@@ -149,7 +149,6 @@ npm run test:cov
   - Utilize Jest para testes unitários
   - Entrega em repositório Git público, com README explicando execução e testes
   - Opcional: documentar decisões de design
-  - Prazo: negociável (sugestão: 3–5 dias úteis)
 
 - Problema:
 
