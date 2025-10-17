@@ -27,6 +27,40 @@ Este repositório contém a base de um projeto NestJS e a infraestrutura (Docker
 - NestJS (framework da API)
 - Jest (testes unitários)
 
+### Entrega (via Fork e Pull Request)
+
+- Faça um fork deste repositório na sua conta.
+- Clone o seu fork e entre na pasta do projeto:
+
+```bash
+git clone <url-do-seu-fork>
+cd teste-node-credito
+```
+
+- (Opcional) Configure o repositório original como `upstream`:
+
+```bash
+git remote add upstream <url-do-repo-original>
+git fetch upstream
+```
+
+- Crie uma branch para o desenvolvimento (ex.: `feat/produtos-upload`):
+
+```bash
+git checkout -b feat/produtos-upload
+```
+
+- Desenvolva, commit e push para o seu fork:
+
+```bash
+git add .
+git commit -m "feat: implementa upload e processamento de produtos"
+git push -u origin feat/produtos-upload
+```
+
+- Abra um Pull Request do seu fork (branch criada) para a branch `main` do repositório original.
+- O Pull Request é o entregável oficial do teste (inclua no PR como rodar, decisões e eventuais limitações).
+
 ### Execução (modo local)
 
 1. Subir infraestrutura (PostgreSQL e, opcionalmente, RabbitMQ):
