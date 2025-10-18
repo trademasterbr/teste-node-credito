@@ -1,20 +1,20 @@
 import { QueryFailedError } from 'typeorm';
 
-export function getDetailFromError(err: unknown): string {
-  if (!err) {
+export function handleDatabaseError(error: unknown): string {
+  if (!error) {
     return 'Erro desconhecido';
   }
 
-  if (err instanceof QueryFailedError) {
-    return err.message || 'Erro na consulta ao banco de dados';
+  if (error instanceof QueryFailedError) {
+    return error.message || 'Erro na consulta ao banco de dados';
   }
 
-  if (err instanceof Error) {
-    return err.message;
+  if (error instanceof Error) {
+    return error.message;
   }
 
-  if (typeof err === 'object') {
-    const errorObj = err as {
+  if (typeof error === 'object') {
+    const errorObj = error as {
       detail?: unknown;
       driverError?: { detail?: unknown };
       message?: unknown;

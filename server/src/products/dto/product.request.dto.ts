@@ -4,11 +4,15 @@ import {
   IsNumber,
   IsNotEmpty,
   IsPositive,
+  MaxLength,
 } from 'class-validator';
 
-export class RequestUploadProductDto {
+export class ProductRequestDto {
   @IsString()
   @IsNotEmpty({ message: 'Nome do produto é obrigatório' })
+  @MaxLength(100, {
+    message: 'Nome do produto deve ter no máximo 255 caracteres',
+  })
   nome: string;
 
   @IsOptional()
