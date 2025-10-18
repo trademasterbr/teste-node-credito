@@ -16,7 +16,9 @@ import { Product } from './products/product.entity';
         password: process.env.POSTGRES_PASSWORD || 'password',
         database: process.env.POSTGRES_DB || 'batch_processing',
         entities: [Product],
-        synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' || true,
+        synchronize:
+          process.env.NODE_ENV !== 'production' &&
+          process.env.TYPEORM_SYNCHRONIZE === 'true',
       }),
     }),
     ProductsModule,
