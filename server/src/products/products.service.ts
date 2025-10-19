@@ -1,7 +1,6 @@
 import {
   Injectable,
   Logger,
-  ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Product } from './product.entity';
@@ -10,6 +9,7 @@ import { ProductRequestDto } from './dto/product.request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { handleDatabaseError } from '../shared/utils/database-helper.util';
 import { ProductBatchError } from './interfaces/product-batch.interface';
+import { CustomConflictException } from '../shared/exceptions';
 
 @Injectable()
 export class ProductsService {
@@ -36,15 +36,15 @@ export class ProductsService {
       });
 
       if (productAlreadySaved) {
-        throw new ConflictException(
-          `Ja existe um produto com o nome ${productData.nome}`,
+        throw new CustomConflictException(
+          `Já existe um produto com o nome: ${productData.nome}`,
         );
       }
 
       const product = this.productRepository.create(productData);
       return await this.productRepository.save(product);
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof CustomConflictException) {
         throw error;
       }
 

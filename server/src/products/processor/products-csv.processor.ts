@@ -24,19 +24,7 @@ export class ProductsCsvProcessor {
     const separator = options?.separator || ',';
     const rows = await parseCsvBuffer(buffer, separator);
 
-    const columnValidation = validateCsvColumns(rows, ['nome', 'preco']);
-    if (!columnValidation.isValid) {
-      return {
-        successCount: 0,
-        errorCount: 1,
-        errors: [
-          {
-            product: new ProductRequestDto(),
-            error: columnValidation.error || 'Erro na validação das colunas',
-          },
-        ],
-      };
-    }
+    validateCsvColumns(rows, ['nome', 'preco']);
 
     const { validProducts, errors: parseErrors } =
       await this.rowsToProducts(rows);

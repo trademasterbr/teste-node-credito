@@ -3,8 +3,6 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  HttpException,
-  HttpStatus,
   Get,
   Logger,
 } from '@nestjs/common';
@@ -13,6 +11,10 @@ import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 import { ProductBatchResponseDto } from './dto/product-batch.response.dto';
 import { ProductsCsvProcessor } from './processor/products-csv.processor';
+import {
+  EmptyFileException,
+  InvalidFileTypeException,
+} from '../shared/exceptions';
 
 @Controller('produtos')
 export class ProductsController {
@@ -34,14 +36,11 @@ export class ProductsController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ProductBatchResponseDto> {
     if (!file) {
-      throw new HttpException('Arquivo não enviado', HttpStatus.BAD_REQUEST);
+      throw new EmptyFileException();
     }
 
     if (!file.originalname.toLowerCase().endsWith('.csv')) {
-      throw new HttpException(
-        'Apenas arquivos CSV são aceitos',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new InvalidFileTypeException(['CSV'], file.originalname);
     }
 
     try {
@@ -68,10 +67,8 @@ export class ProductsController {
         error: error instanceof Error ? error.message : 'Erro desconhecido',
         filename: file.originalname,
       });
-      throw new HttpException(
-        'Erro ao processar arquivo',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // Re-throw para que o filtro global trate adequadamente
+      throw error;
     }
   }
 }

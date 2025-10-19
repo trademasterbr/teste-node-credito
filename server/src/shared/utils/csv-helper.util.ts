@@ -1,6 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { Readable } from 'stream';
 import * as csv from 'csv-parser';
+import {
+  CsvParsingException,
+  EmptyCsvException,
+  MissingRequiredColumnsException,
+} from '../exceptions';
 
 const logger = new Logger('CsvHandlersUtil');
 
@@ -33,7 +38,7 @@ export async function parseCsvBuffer(
           error: error.message,
           stack: error.stack,
         });
-        reject(new Error(`Falha no processamento do CSV: ${error.message}`));
+        reject(new CsvParsingException(error.message));
       });
   });
 }
@@ -41,15 +46,9 @@ export async function parseCsvBuffer(
 export function validateCsvColumns(
   rows: Record<string, string>[],
   requiredColumns: string[],
-): {
-  isValid: boolean;
-  error?: string;
-} {
+): void {
   if (rows.length === 0) {
-    return {
-      isValid: false,
-      error: 'Arquivo CSV está vazio ou não possui dados válidos',
-    };
+    throw new EmptyCsvException();
   }
 
   const firstRow = rows[0];
@@ -68,18 +67,10 @@ export function validateCsvColumns(
       missingColumns,
     });
 
-    return {
-      isValid: false,
-      error: `
-      Colunas obrigatórias não encontradas: ${missingColumns.join(', ')}.
-      Colunas esperadas: ${requiredColumns.join(', ')}
-      `,
-    };
+    throw new MissingRequiredColumnsException(missingColumns, requiredColumns);
   }
 
   logger.debug('Validação das colunas do CSV realizada com sucesso', {
     colunasEncontradas: availableColumns,
   });
-
-  return { isValid: true };
 }
