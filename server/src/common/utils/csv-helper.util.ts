@@ -15,7 +15,11 @@ export async function parseCsvBuffer(
 ): Promise<Record<string, string>[]> {
   return new Promise((resolve, reject) => {
     const rows: Record<string, string>[] = [];
-    const readable = Readable.from(buffer);
+    const bufferInstance = Buffer.isBuffer(buffer)
+      ? buffer
+      : Buffer.from(buffer);
+    const csvContent = bufferInstance.toString('utf-8');
+    const readable = Readable.from([csvContent]);
 
     readable
       .pipe(

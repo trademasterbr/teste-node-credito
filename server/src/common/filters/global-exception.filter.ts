@@ -14,8 +14,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<Response>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Erro interno do servidor';
@@ -34,7 +34,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         message = (responseObj.message as string) || exception.message;
       }
     } else if (exception instanceof Error) {
-      this.logger.error('Unexpected error occurred', {
+      this.logger.error('Ocorreu um erro inesperado', {
         message: exception.message,
         stack: exception.stack,
         url: request.url,

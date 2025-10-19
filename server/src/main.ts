@@ -7,9 +7,18 @@ Object.defineProperty(globalThis, 'crypto', {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { Transport } from '@nestjs/microservices';
+import { rabbitmqConfigs } from './infra/rabbitmq/rabbitmq.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  Object.values(rabbitmqConfigs).forEach((config) => {
+    app.connectMicroservice({
+      transport: Transport.RMQ,
+      options: config,
+    });
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,6 +27,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  await app.startAllMicroservices();
 
   await app.listen(process.env.PORT ?? 3000);
 }

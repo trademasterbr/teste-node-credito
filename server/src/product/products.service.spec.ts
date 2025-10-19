@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from './product.entity';
+import { Product } from './products.entity';
 import { ProductsService } from './products.service';
-import { ProductRequestDto } from './dto/product.request.dto';
+import { ProductRequestDto } from './dto/products.request.dto';
+import { ProductsPublisherProcessor } from './publisher/product.publishers';
 
-jest.mock('../shared/utils/database-helper.util', () => ({
+jest.mock('../common/utils/database-helper.util', () => ({
   handleDatabaseError: jest.fn((error: unknown): string => {
     if (error && typeof error === 'object' && 'message' in error) {
       return (error as { message: string }).message;
@@ -25,6 +26,10 @@ describe('ProductsService', () => {
     exists: jest.fn() as jest.MockedFunction<Repository<Product>['exists']>,
   };
 
+  const mockPublisher = {
+    publishProductCsvBatch: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -32,6 +37,10 @@ describe('ProductsService', () => {
         {
           provide: getRepositoryToken(Product),
           useValue: mockRepository,
+        },
+        {
+          provide: ProductsPublisherProcessor,
+          useValue: mockPublisher,
         },
       ],
     }).compile();
@@ -135,123 +144,17 @@ describe('ProductsService', () => {
     });
   });
 
-  describe('createProductsBatch', () => {
-    it('should successfully create multiple products', async () => {
-      const productsData: ProductRequestDto[] = [
-        { nome: 'Produto 1', descricao: 'Descrição 1', preco: 10.5 },
-        { nome: 'Produto 2', descricao: 'Descrição 2', preco: 20.0 },
-      ];
+  describe('sendProductsCsvToBatch', () => {
+    it('should send file data to batch processing', () => {
+      const fileData = {
+        filename: 'test.csv',
+        buffer: Buffer.from('nome,preco\nProduto,10.5'),
+      };
 
-      const mockProduct1 = {
-        id: '1',
-        nome: 'Produto 1',
-        descricao: 'Descrição 1',
-        preco: 10.5,
-      } as Product;
-      const mockProduct2 = {
-        id: '2',
-        nome: 'Produto 2',
-        descricao: 'Descrição 2',
-        preco: 20.0,
-      } as Product;
+      service.sendProductsCsvToBatch(fileData);
 
-      repository.exists.mockResolvedValue(false);
-      repository.create
-        .mockReturnValueOnce(mockProduct1)
-        .mockReturnValueOnce(mockProduct2);
-      repository.save
-        .mockResolvedValueOnce(mockProduct1)
-        .mockResolvedValueOnce(mockProduct2);
-
-      const result = await service.createProductsBatch(productsData);
-
-      expect(result.successCount).toBe(2);
-      expect(result.errors).toHaveLength(0);
-      expect(mockRepository.create).toHaveBeenCalledTimes(2);
-      expect(mockRepository.save).toHaveBeenCalledTimes(2);
-    });
-
-    it('should handle partial failures in batch creation', async () => {
-      const productsData: ProductRequestDto[] = [
-        { nome: 'Produto 1', descricao: 'Descrição 1', preco: 10.5 },
-        { nome: 'Produto 2', descricao: 'Descrição 2', preco: 20.0 },
-      ];
-
-      const mockProduct1 = {
-        id: '1',
-        nome: 'Produto 1',
-        descricao: 'Descrição 1',
-        preco: 10.5,
-      } as Product;
-      const mockProduct2 = {
-        id: '2',
-        nome: 'Produto 2',
-        descricao: 'Descrição 2',
-        preco: 20.0,
-      } as Product;
-
-      repository.exists
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true);
-      repository.create
-        .mockReturnValueOnce(mockProduct1)
-        .mockReturnValueOnce(mockProduct2);
-      repository.save.mockResolvedValueOnce(mockProduct1);
-
-      const result = await service.createProductsBatch(productsData);
-
-      expect(result.successCount).toBe(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toBe(
-        'Já existe um produto com o nome: Produto 2',
-      );
-      expect(result.errors[0].product).toEqual(productsData[1]);
-    });
-
-    it('should handle empty batch', async () => {
-      const productsData: ProductRequestDto[] = [];
-
-      const result = await service.createProductsBatch(productsData);
-
-      expect(result.successCount).toBe(0);
-      expect(result.errors).toHaveLength(0);
-      expect(mockRepository.create).not.toHaveBeenCalled();
-      expect(mockRepository.save).not.toHaveBeenCalled();
-    });
-
-    it('should handle all failures in batch creation', async () => {
-      const productsData: ProductRequestDto[] = [
-        { nome: 'Produto 1', descricao: 'Descrição 1', preco: 10.5 },
-        { nome: 'Produto 2', descricao: 'Descrição 2', preco: 20.0 },
-      ];
-
-      const mockProduct1 = {
-        id: '1',
-        nome: 'Produto 1',
-        descricao: 'Descrição 1',
-        preco: 10.5,
-      } as Product;
-      const mockProduct2 = {
-        id: '2',
-        nome: 'Produto 2',
-        descricao: 'Descrição 2',
-        preco: 20.0,
-      } as Product;
-
-      repository.exists.mockResolvedValue(true);
-      repository.create
-        .mockReturnValueOnce(mockProduct1)
-        .mockReturnValueOnce(mockProduct2);
-
-      const result = await service.createProductsBatch(productsData);
-
-      expect(result.successCount).toBe(0);
-      expect(result.errors).toHaveLength(2);
-      expect(result.errors[0].error).toBe(
-        'Já existe um produto com o nome: Produto 1',
-      );
-      expect(result.errors[1].error).toBe(
-        'Já existe um produto com o nome: Produto 2',
+      expect(mockPublisher.publishProductCsvBatch).toHaveBeenCalledWith(
+        fileData,
       );
     });
   });

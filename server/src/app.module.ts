@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER } from '@nestjs/core';
-import { ProductsModule } from './products/products.module';
-import { Product } from './products/product.entity';
-import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { ProductsModule } from './product/products.module';
+import { BatchModule } from './batch/batch.module';
+import { RabbitmqModule } from './infra/rabbitmq/rabbitmq.module';
+import { Product } from './product/products.entity';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { GlobalExceptionFilter } from './shared/filters/global-exception.filter'
       }),
     }),
     ProductsModule,
+    BatchModule,
+    RabbitmqModule,
   ],
   providers: [
     {

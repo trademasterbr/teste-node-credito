@@ -3,21 +3,23 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Product } from './product.entity';
+import { IProductService } from '../common/interfaces/product-service.interface';
+import { Product } from './products.entity';
 import { Repository } from 'typeorm';
-import { ProductRequestDto } from './dto/product.request.dto';
+import { ProductRequestDto } from './dto/products.request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { handleDatabaseError } from '../shared/utils/database-helper.util';
-import { ProductBatchError } from './interfaces/product-batch.interface';
-import { CustomConflictException } from '../shared/exceptions';
+import { handleDatabaseError } from '../common/utils/database-helper.util';
+import { CustomConflictException } from '../common/exceptions';
+import { ProductsPublisherProcessor } from './publisher/product.publishers';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService implements IProductService {
   private readonly logger = new Logger(ProductsService.name);
 
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    private readonly publisherProcessor: ProductsPublisherProcessor,
   ) {}
 
   async findAll(): Promise<Product[]> {
@@ -28,19 +30,16 @@ export class ProductsService {
       throw error;
     }
   }
-
   async create(productData: ProductRequestDto): Promise<Product> {
     try {
       const productAlreadySaved: boolean = await this.productRepository.exists({
         where: { nome: productData.nome },
       });
-
       if (productAlreadySaved) {
         throw new CustomConflictException(
           `Já existe um produto com o nome: ${productData.nome}`,
         );
       }
-
       const product = this.productRepository.create(productData);
       return await this.productRepository.save(product);
     } catch (error) {
@@ -54,33 +53,17 @@ export class ProductsService {
     }
   }
 
-  async createProductsBatch(
-    products: ProductRequestDto[],
-  ): Promise<{ successCount: number; errors: ProductBatchError[] }> {
-    const errors: ProductBatchError[] = [];
-    let successCount = 0;
-
-    for (const product of products) {
-      try {
-        await this.create(product);
-        successCount++;
-      } catch (error) {
-        this.logger.warn('Falha ao processar produto no lote', {
-          product: product.nome,
-          error: error instanceof Error ? error.message : 'Erro desconhecido',
-        });
-
-        errors.push({
-          product,
-          error: error instanceof Error ? error.message : 'Erro desconhecido',
-        });
-      }
+  sendProductsCsvToBatch(fileData: { filename: string; buffer: Buffer }): void {
+    try {
+      this.publisherProcessor.publishProductCsvBatch(fileData);
+      this.logger.log(
+        `Arquivo ${fileData.filename} enviado para processamento em lote`,
+      );
+    } catch (error) {
+      this.logger.error('Erro ao enviar arquivo para fila', error);
+      throw new InternalServerErrorException(
+        'Falha ao enviar arquivo para processamento',
+      );
     }
-
-    this.logger.log(
-      `Processamento em lote concluído: ${successCount} sucessos, ${errors.length} erros`,
-    );
-
-    return { successCount, errors };
   }
 }

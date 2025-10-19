@@ -1,5 +1,5 @@
 import { validate } from 'class-validator';
-import { ProductRequestDto } from './product.request.dto';
+import { ProductRequestDto } from './products.request.dto';
 
 describe('RequestUploadProductDto', () => {
   describe('validation', () => {
