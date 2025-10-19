@@ -97,7 +97,7 @@ describe('ProductsService', () => {
       repository.exists.mockResolvedValue(true);
 
       await expect(service.create(productData)).rejects.toThrow(
-        'Ja existe um produto com o nome Existing Product',
+        'Já existe um produto com o nome: Existing Product',
       );
     });
   });
@@ -203,7 +203,7 @@ describe('ProductsService', () => {
       expect(result.successCount).toBe(1);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].error).toBe(
-        'Ja existe um produto com o nome Produto 2',
+        'Já existe um produto com o nome: Produto 2',
       );
       expect(result.errors[0].product).toEqual(productsData[1]);
     });
@@ -248,10 +248,10 @@ describe('ProductsService', () => {
       expect(result.successCount).toBe(0);
       expect(result.errors).toHaveLength(2);
       expect(result.errors[0].error).toBe(
-        'Ja existe um produto com o nome Produto 1',
+        'Já existe um produto com o nome: Produto 1',
       );
       expect(result.errors[1].error).toBe(
-        'Ja existe um produto com o nome Produto 2',
+        'Já existe um produto com o nome: Produto 2',
       );
     });
   });

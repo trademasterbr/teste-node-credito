@@ -116,32 +116,18 @@ describe('ProductsCsvProcessor', () => {
 
       const buffer = Buffer.from(csvContent);
 
-      const result = await processor.importCsvBuffer(
-        buffer,
-        mockPersistProductsBatch,
-      );
-
-      expect(result.successCount).toBe(0);
-      expect(result.errorCount).toBe(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain('Arquivo CSV está vazio');
+      await expect(
+        processor.importCsvBuffer(buffer, mockPersistProductsBatch),
+      ).rejects.toThrow('Arquivo CSV está vazio ou não possui dados válidos');
     });
 
     it('should handle malformed CSV gracefully', async () => {
       const csvContent = 'conteúdo malformado sem estrutura CSV válida';
       const buffer = Buffer.from(csvContent);
 
-      const result = await processor.importCsvBuffer(
-        buffer,
-        mockPersistProductsBatch,
-      );
-
-      expect(result.successCount).toBe(0);
-      expect(result.errorCount).toBe(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain(
-        'Arquivo CSV está vazio ou não possui dados válidos',
-      );
+      await expect(
+        processor.importCsvBuffer(buffer, mockPersistProductsBatch),
+      ).rejects.toThrow('Arquivo CSV está vazio ou não possui dados válidos');
     });
 
     it('should validate missing required columns', async () => {
@@ -151,16 +137,10 @@ describe('ProductsCsvProcessor', () => {
 
       const buffer = Buffer.from(csvContent);
 
-      const result = await processor.importCsvBuffer(
-        buffer,
-        mockPersistProductsBatch,
-      );
-
-      expect(result.successCount).toBe(0);
-      expect(result.errorCount).toBe(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error).toContain(
-        'Colunas obrigatórias não encontradas',
+      await expect(
+        processor.importCsvBuffer(buffer, mockPersistProductsBatch),
+      ).rejects.toThrow(
+        'Colunas obrigatórias não encontradas: preco. Colunas esperadas: nome, preco',
       );
     });
 

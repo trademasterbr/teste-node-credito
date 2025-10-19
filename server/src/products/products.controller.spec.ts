@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { ProductsCsvProcessor } from './processor/products-csv.processor';
@@ -126,9 +125,7 @@ describe('ProductsController', () => {
     it('should throw error when no file is provided', async () => {
       await expect(
         controller.uploadFile(undefined as unknown as Express.Multer.File),
-      ).rejects.toThrow(
-        new HttpException('Arquivo não enviado', HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow('Arquivo não enviado ou está vazio');
 
       expect(mockCsvProcessor.importCsvBuffer).not.toHaveBeenCalled();
     });
@@ -141,10 +138,7 @@ describe('ProductsController', () => {
       mockCsvProcessor.importCsvBuffer.mockRejectedValue(processingError);
 
       await expect(controller.uploadFile(mockFile)).rejects.toThrow(
-        new HttpException(
-          'Erro ao processar arquivo',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        processingError,
       );
 
       expect(mockCsvProcessor.importCsvBuffer).toHaveBeenCalledWith(
@@ -294,10 +288,7 @@ describe('ProductsController', () => {
       const mockFile = createMockFile(textContent, 'test.txt', 'text/plain');
 
       await expect(controller.uploadFile(mockFile)).rejects.toThrow(
-        new HttpException(
-          'Apenas arquivos CSV são aceitos',
-          HttpStatus.BAD_REQUEST,
-        ),
+        'Tipo de arquivo não suportado: test.txt. Tipos permitidos: CSV',
       );
 
       expect(mockCsvProcessor.importCsvBuffer).not.toHaveBeenCalled();
@@ -311,10 +302,7 @@ describe('ProductsController', () => {
       );
 
       await expect(controller.uploadFile(mockFile)).rejects.toThrow(
-        new HttpException(
-          'Apenas arquivos CSV são aceitos',
-          HttpStatus.BAD_REQUEST,
-        ),
+        'Tipo de arquivo não suportado: test.TXT. Tipos permitidos: CSV',
       );
 
       expect(mockCsvProcessor.importCsvBuffer).not.toHaveBeenCalled();
