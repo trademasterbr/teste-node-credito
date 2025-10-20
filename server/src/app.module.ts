@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER } from '@nestjs/core';
-import { ProductsModule } from './product/products.module';
-import { BatchModule } from './batch/batch.module';
+import { ProductsModule } from './products/products.module';
+import { BatchModule } from './batches/batches.module';
 import { RabbitmqModule } from './infra/rabbitmq/rabbitmq.module';
-import { Product } from './product/products.entity';
+import { Product } from './products/products.entity';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({

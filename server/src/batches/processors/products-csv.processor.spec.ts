@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as classValidator from 'class-validator';
 import { ProductsCsvProcessor } from './products-csv.processor';
-import * as csvHelperUtil from '../../common/utils/csv-helper.util';
-import { ICsvFileData } from '../dto/fileData.interface';
+import * as csvHelperUtil from '../../common/utils/csv-helpers.util';
+import { ICsvFileData } from '../interfaces/fileData.interface';
 
 describe('ProductsCsvProcessor', () => {
   let processor: ProductsCsvProcessor;

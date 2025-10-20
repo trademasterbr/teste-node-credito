@@ -6,11 +6,11 @@ import {
 import { IProductService } from '../common/interfaces/product-service.interface';
 import { Product } from './products.entity';
 import { Repository } from 'typeorm';
-import { ProductRequestDto } from './dto/products.request.dto';
+import { ProductRequestDto } from './dtos/product.request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { handleDatabaseError } from '../common/utils/database-helper.util';
+import { handleDatabaseError } from '../common/utils/database-helpers.util';
 import { CustomConflictException } from '../common/exceptions';
-import { ProductsPublisherProcessor } from './publisher/product.publishers';
+import { ProductsPublisherProcessor } from './publishers/products.publisher';
 
 @Injectable()
 export class ProductsService implements IProductService {

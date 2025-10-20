@@ -1,14 +1,14 @@
 import { validate } from 'class-validator';
 import { Injectable, Logger } from '@nestjs/common';
-import { IBatchError, IBatchResult } from '../dto/batch.interface';
-import { ProductRequestDto } from '../../product/dto/products.request.dto';
+import { IBatchError, IBatchResult } from '../interfaces/batch.interface';
+import { ProductRequestDto } from '../../products/dtos/product.request.dto';
 import {
   parseCsvBuffer,
   validateCsvColumns,
-} from '../../common/utils/csv-helper.util';
+} from '../../common/utils/csv-helpers.util';
 import { IProductService } from '../../common/interfaces/product-service.interface';
 import { Inject } from '@nestjs/common';
-import { ICsvFileData } from '../dto/fileData.interface';
+import { ICsvFileData } from '../interfaces/fileData.interface';
 
 @Injectable()
 export class ProductsCsvProcessor {

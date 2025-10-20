@@ -65,23 +65,23 @@ src/
 ├── app.module.ts              # Módulo raiz da aplicação
 ├── main.ts                    # Inicialização da aplicação
 ├── app.module.ts              # Configuração geral da aplicação
-├── product/                   # Módulo de Produtos
+├── products/                  # Módulo de Produtos
 │   ├── products.controller.ts # Endpoints REST
 │   ├── products.service.ts    # Lógica de negócio
 │   ├── products.entity.ts     # Entidade TypeORM
 │   ├── products.module.ts     # Configuração do módulo
-│   ├── dto/
-│   │   └── products.request.dto.ts # DTOs de validação
-│   └── publisher/
-│       └── product.publishers.ts   # Publisher RabbitMQ
-├── batch/                     # Módulo de Processamento em Lote
-│   ├── batch.service.ts       # Orquestrador de processamento
-│   ├── batch.module.ts        # Configuração do módulo
-│   ├── consumer/
-│   │   └── batch.consumer.ts  # Consumer RabbitMQ
-│   ├── processor/
+│   ├── dtos/
+│   │   └── product.request.dto.ts # DTOs de validação
+│   └── publishers/
+│       └── products.publisher.ts   # Publisher RabbitMQ
+├── batches/                     # Módulo de Processamento em Lote
+│   ├── batches.service.ts       # Orquestrador de processamento
+│   ├── batches.module.ts        # Configuração do módulo
+│   ├── consumers/
+│   │   └── batches.consumer.ts  # Consumer RabbitMQ
+│   ├── processors/
 │   │   └── products-csv.processor.ts # Processador CSV para produtos
-│   └── dto/                   # Interfaces de lote
+│   └── interfaces/                   # Interfaces de lote
 ├── infra/                     # Infraestrutura
 │   └── rabbitmq/
 │       ├── rabbitmq.service.ts    # Serviço RabbitMQ
@@ -104,8 +104,8 @@ src/
   - `ProductsEntity`: Entidade TypeORM do produto
 
 - **BatchModule**: 
-  - `BatchConsumer`: Consumer RabbitMQ que escuta fila de processamento
-  - `BatchService`: Orquestrador do processamento de arquivos
+  - `BatchesConsumer`: Consumer RabbitMQ que escuta fila de processamento
+  - `BatchesService`: Orquestrador do processamento de arquivos
   - `ProductsCsvProcessor`: Processamento específico de CSV de produtos
 
 - **RabbitmqModule**: 

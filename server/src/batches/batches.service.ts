@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ProductsCsvProcessor } from './processor/products-csv.processor';
-import { ICsvFileData } from './dto/fileData.interface';
+import { ProductsCsvProcessor } from './processors/products-csv.processor';
+import { ICsvFileData } from './interfaces/fileData.interface';
 
 @Injectable()
 export class BatchService {

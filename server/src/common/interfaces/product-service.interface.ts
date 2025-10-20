@@ -1,4 +1,4 @@
-import { Product } from 'src/product/products.entity';
+import { Product } from 'src/products/products.entity';
 
 export interface IProductService {
   create(product: any): Promise<Product>;

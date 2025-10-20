@@ -1,8 +1,8 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { BatchService } from '../batch.service';
+import { BatchService } from '../batches.service';
 import { RABBITMQ_QUEUES } from '../../infra/rabbitmq/rabbitmq.constants';
-import { ICsvFileData } from '../dto/fileData.interface';
+import { ICsvFileData } from '../interfaces/fileData.interface';
 
 @Controller()
 export class BatchConsumer {

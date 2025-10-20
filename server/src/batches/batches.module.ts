@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BatchService } from './batch.service';
+import { BatchService } from './batches.service';
 import { RabbitmqModule } from '../infra/rabbitmq/rabbitmq.module';
-import { Product } from '../product/products.entity';
-import { ProductsCsvProcessor } from './processor/products-csv.processor';
-import { BatchConsumer } from './consumer/batch.consumer';
-import { ProductsModule } from '../product/products.module';
+import { Product } from '../products/products.entity';
+import { ProductsCsvProcessor } from './processors/products-csv.processor';
+import { BatchConsumer } from './consumers/batch.consumer';
+import { ProductsModule } from '../products/products.module';
 
 @Module({
   imports: [

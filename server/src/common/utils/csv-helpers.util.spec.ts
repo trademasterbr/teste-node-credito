@@ -1,4 +1,4 @@
-import { parseCsvBuffer, validateCsvColumns } from './csv-helper.util';
+import { parseCsvBuffer, validateCsvColumns } from './csv-helpers.util';
 import {
   EmptyCsvException,
   MissingRequiredColumnsException,

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BatchService } from './batch.service';
-import { ProductsCsvProcessor } from './processor/products-csv.processor';
-import { ICsvFileData } from './dto/fileData.interface';
+import { BatchService } from './batches.service';
+import { ProductsCsvProcessor } from './processors/products-csv.processor';
+import { ICsvFileData } from './interfaces/fileData.interface';
 
 describe('BatchService', () => {
   let service: BatchService;

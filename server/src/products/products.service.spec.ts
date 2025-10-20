@@ -3,10 +3,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './products.entity';
 import { ProductsService } from './products.service';
-import { ProductRequestDto } from './dto/products.request.dto';
-import { ProductsPublisherProcessor } from './publisher/product.publishers';
+import { ProductRequestDto } from './dtos/product.request.dto';
+import { ProductsPublisherProcessor } from './publishers/products.publisher';
 
-jest.mock('../common/utils/database-helper.util', () => ({
+jest.mock('../common/utils/database-helpers.util', () => ({
   handleDatabaseError: jest.fn((error: unknown): string => {
     if (error && typeof error === 'object' && 'message' in error) {
       return (error as { message: string }).message;
