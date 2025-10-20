@@ -1,98 +1,299 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Sistema de Registro de Produtos - API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API RESTful desenvolvida em NestJS para processamento de arquivos CSV para persistir produtos em lote com PostgreSQL e RabbitMQ.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Funcionalidades
 
-## Description
+- Upload de arquivos CSV via endpoint REST
+- Processamento em lote com RabbitMQ
+- Validação de dados com class-validator
+- Persistência apenas de registros válidos
+- Prevenção de duplicatas
+- Testes unitários com Jest
+- Listagem de produtos via endpoint REST
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Pré-requisitos
 
-## Project setup
+- Node.js v16 ou superior
+- PostgreSQL v13 ou superior
+- RabbitMQ v3.8 ou superior
+- Docker (opcional, para infraestrutura)
+
+## Instalação
 
 ```bash
-$ npm install
+# Clone o repositório
+git clone <url-do-repositorio>
+cd teste-node-credito/server
+
+# Instale as dependências
+npm install
 ```
 
-## Compile and run the project
+### Configurar ambiente
+```bash
+cp example.env .env
+# Edite o .env com suas configurações
+```
+
+### Subir infraestrutura com Docker (Recomendado)
+```bash
+# Na raiz do projeto
+docker compose up -d
+```
+
+### Executar aplicação (local)
+```bash
+npm run start:dev
+```
+
+### Executar testes
+```bash
+npm run test
+npm run test:cov
+```
+
+## Acesso local
+- API: http://localhost:3000
+- RabbitMQ Management: http://localhost:15672 (user: user, pass: password)
+- PostgreSQL: localhost:5432
+
+## Estrutura do Projeto
+
+```
+src/
+├── app.module.ts              # Módulo raiz da aplicação
+├── main.ts                    # Inicialização da aplicação
+├── app.module.ts              # Configuração geral da aplicação
+├── product/                   # Módulo de Produtos
+│   ├── products.controller.ts # Endpoints REST
+│   ├── products.service.ts    # Lógica de negócio
+│   ├── products.entity.ts     # Entidade TypeORM
+│   ├── products.module.ts     # Configuração do módulo
+│   ├── dto/
+│   │   └── products.request.dto.ts # DTOs de validação
+│   └── publisher/
+│       └── product.publishers.ts   # Publisher RabbitMQ
+├── batch/                     # Módulo de Processamento em Lote
+│   ├── batch.service.ts       # Orquestrador de processamento
+│   ├── batch.module.ts        # Configuração do módulo
+│   ├── consumer/
+│   │   └── batch.consumer.ts  # Consumer RabbitMQ
+│   ├── processor/
+│   │   └── products-csv.processor.ts # Processador CSV para produtos
+│   └── dto/                   # Interfaces de lote
+├── infra/                     # Infraestrutura
+│   └── rabbitmq/
+│       ├── rabbitmq.service.ts    # Serviço RabbitMQ
+│       ├── rabbitmq.config.ts     # Configurações de filas
+│       ├── rabbitmq.constants.ts  # Constantes (filas)
+│       └── rabbitmq.module.ts     # Módulo RabbitMQ
+└── common/                    # Utilitários Compartilhados
+    ├── exceptions/            # Exceções customizadas
+    ├── filters/               # Filtros globais
+    ├── interfaces/            # Contratos de serviços
+    └── utils/                 # Utilitários (CSV, DB)
+```
+
+### Responsabilidades dos Módulos
+
+- **ProductsModule**: 
+  - `ProductsController`: Endpoints REST (upload, listar produtos)
+  - `ProductsService`: Lógica de negócio e persistência direta
+  - `ProductsPublisherProcessor`: Publicação de mensagens para RabbitMQ
+  - `ProductsEntity`: Entidade TypeORM do produto
+
+- **BatchModule**: 
+  - `BatchConsumer`: Consumer RabbitMQ que escuta fila de processamento
+  - `BatchService`: Orquestrador do processamento de arquivos
+  - `ProductsCsvProcessor`: Processamento específico de CSV de produtos
+
+- **RabbitmqModule**: 
+  - `RabbitmqService`: Serviço para emissão de mensagens
+  - Configurações de filas e conexões
+
+- **Common**: 
+  - Utilitários (CSV parsing, validação, database helpers)
+  - Exceções customizadas
+  - Interfaces e contratos de serviços
+  - Filtros globais de exceção
+
+## API Endpoints
+
+### POST `/produtos/upload`
+
+Recebe arquivo CSV para cadastro de produtos em lote.
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl -X POST http://localhost:3000/produtos/upload \
+  -F "file=@./exemplo.csv" \
+  -H "Content-Type: multipart/form-data"
 ```
 
-## Run tests
+Response:
+```json
+{
+  "message": "Arquivo recebido com sucesso e enviado para processamento",
+  "filename": "exemplo.csv"
+}
+```
+
+**Formato CSV esperado:**
+```csv
+nome,descricao,preco
+"Caneta Azul","Esferográfica ponta fina",2.50
+"Caderno","96 folhas",12.90
+```
+
+**Validações aplicadas:**
+- `nome`: obrigatório, string, máximo 100 caracteres
+- `preco`: obrigatório, número positivo
+- `descricao`: opcional, string  
+- Colunas obrigatórias no CSV: `nome`, `preco`
+- Produtos duplicados (mesmo nome) são rejeitados
+- Linhas com erros de validação são registradas nos logs mas não interrompem o processamento
+
+### GET `/produtos`
+Lista todos os produtos cadastrados.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl -X GET http://localhost:3000/produtos
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+**Response:**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "nome": "Caneta Azul",
+    "descricao": "Esferográfica ponta fina",
+    "preco": 2.50
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "nome": "Caderno",
+    "descricao": "96 folhas",
+    "preco": 12.90
+  }
+]
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Arquitetura RabbitMQ
 
-## Resources
+O sistema utiliza RabbitMQ para desacoplar o upload do processamento, proporcionando:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Escalabilidade**: Múltiplos consumers podem processar arquivos
+- **Resiliência**: Filas duráveis garantem que mensagens não sejam perdidas  
+- **Performance**: Upload não bloqueia enquanto processa arquivo
+- **Processamento Tolerante a Falhas**: Erros em produtos individuais não param o processamento do lote completo
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Comportamento do Processamento
 
-## Support
+- **Processamento Individual**: Cada produto é processado e persistido separadamente
+- **Falha Parcial**: Se alguns produtos falharem na validação/persistência, os válidos continuam sendo salvos
+- **Logging Detalhado**: Todos os sucessos e falhas são registrados com contexto completo
+- **Resposta Imediata**: Cliente recebe confirmação de upload antes do processamento começar
+- **Fila Durável**: Arquivos não são perdidos mesmo se o sistema for reiniciado
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Fluxo de Mensagens
 
-## Stay in touch
+1. Cliente faz POST /produtos/upload
+2. ProductsController (Valida se é um .csv) → ProductsService → ProductsPublisherProcessor → RabbitmqService
+3. RabbitmqService publica mensagem na fila RabbitMQ
+4. Controller retorna resposta imediata ao cliente
+5. BatchConsumer escuta fila e recebe mensagem
+6. BatchConsumer → BatchService → ProductsCsvProcessor
+7. ProductsCsvProcessor processa CSV, valida dados e persiste produtos válidos
+8. Logs são gerados para acompanhar sucesso/erros do processamento
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Configuração das Filas
 
-## License
+```typescript
+export const RABBITMQ_QUEUES = {
+  PRODUCT_CSV_BATCH_QUEUE: 'product_csv_batch_queue',
+};
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+export const rabbitmqConfigs = {
+  PRODUCT_CSV_BATCH_QUEUE: {
+    urls: [process.env.RABBITMQ_URL],
+    queue: RABBITMQ_QUEUES.PRODUCT_CSV_BATCH_QUEUE,
+    queueOptions: {
+      durable: true,
+    },
+  },
+};
+```
+
+### Fluxo de Mensagens
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant ProductsController
+    participant ProductsService
+    participant ProductsPublisher
+    participant RabbitmqService
+    participant RabbitMQ
+    participant BatchConsumer
+    participant BatchService
+    participant ProductsCsvProcessor
+    participant Database
+
+    Client->>ProductsController: POST /produtos/upload (CSV file)
+    ProductsController->>ProductsController: validate file exists & is .csv
+    ProductsController->>ProductsService: sendProductsCsvToBatch(fileData)
+    ProductsService->>ProductsPublisher: publishProductCsvBatch(fileData)
+    ProductsPublisher->>RabbitmqService: emitProductCsvBatch(fileData)
+    RabbitmqService->>RabbitMQ: emit message to queue
+    ProductsController->>Client: 200 OK (upload received)
+    
+    Note over RabbitMQ,ProductsCsvProcessor: Asynchronous Processing
+    RabbitMQ->>BatchConsumer: deliver message (EventPattern)
+    BatchConsumer->>BatchService: processProductCsvFile(fileData)
+    BatchService->>ProductsCsvProcessor: processProductCsvBatch(fileData)
+    ProductsCsvProcessor->>ProductsCsvProcessor: parseCsvBuffer()
+    ProductsCsvProcessor->>ProductsCsvProcessor: validateCsvColumns()
+    ProductsCsvProcessor->>ProductsCsvProcessor: rowsToProducts() - validate each row
+    ProductsCsvProcessor->>ProductsCsvProcessor: persistProductsBatch() - save valid products
+    loop For each valid product
+        ProductsCsvProcessor->>Database: productService.create(product)
+    end
+    ProductsCsvProcessor->>BatchService: return IBatchResult
+```
+
+### Estrutura da Mensagem
+
+```typescript
+interface ICsvFileData {
+  filename: string;
+  buffer: Buffer;
+  options?: {
+    separator?: string;
+  };
+}
+
+interface IBatchResult<T> {
+  successCount: number;
+  errorCount: number;  
+  errors: IBatchError<T>[];
+}
+
+interface IBatchError<T> {
+  item: T;
+  error?: string;
+  validationErrors?: ValidationError[];
+}
+```
+
+### Monitoramento
+
+Acesse o **RabbitMQ Management Console** em http://localhost:15672:
+
+- **Filas**: Visualize quantidade de mensagens
+- **Consumers**: Verifique consumers ativos
+- **Rates**: Monitore throughput de mensagens
+- **Connections**: Acompanhe conexões ativas
+
+## Licença
+
+Este projeto é disponibilizado apenas para fins de avaliação técnica.
